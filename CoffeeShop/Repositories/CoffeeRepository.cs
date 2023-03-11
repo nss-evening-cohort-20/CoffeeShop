@@ -7,15 +7,28 @@ namespace CoffeeShop.Repositories;
 
 public class CoffeeRepository : BaseRepository, ICoffeeRepository
 {
-    private const string _coffeeSql = @"SELECT c.Id
-                                              ,c.Title
-                                              ,c.BeanVarietyId
-                                              ,b.[Name]
-                                              ,b.Region
-                                              ,b.Notes
-                                        FROM Coffee c
-                                        JOIN BeanVariety b on b.Id = c.BeanVarietyId ";
+    private const string _coffeeSelect = @"SELECT c.Id
+                                                 ,c.Title
+                                                 ,c.BeanVarietyId
+                                                 ,b.[Name]
+                                                 ,b.Region
+                                                 ,b.Notes
+                                           FROM Coffee c
+                                           JOIN BeanVariety b on b.Id = c.BeanVarietyId ";
 
+    private const string _coffeeInsert = @"INSERT INTO Coffee
+                                               (Title, BeanVarietyId)
+                                           OUTPUT INSERTED.Id
+                                           VALUES
+                                               (@title, @beanVarietyId)";
+
+    private const string _coffeeUpdate = @"UPDATE Coffee
+                                           SET Title = @title,
+                                               BeanVarietyId = @beanVarietyId
+                                           WHERE Id = @id";
+
+    private const string _coffeeDelete = @"DELETE FROM Coffee
+                                           WHERE Id = @id";
     public CoffeeRepository(IConfiguration configuration) : base(configuration)
     {
     }
@@ -26,7 +39,7 @@ public class CoffeeRepository : BaseRepository, ICoffeeRepository
         conn.Open();
 
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = _coffeeSql;
+        cmd.CommandText = _coffeeSelect;
         
         using var reader = cmd.ExecuteReader();
         List<Coffee> results = new();
@@ -38,7 +51,6 @@ public class CoffeeRepository : BaseRepository, ICoffeeRepository
 
         return results;
     }
-
     
     public Coffee? GetById(int id)
     {
@@ -46,7 +58,7 @@ public class CoffeeRepository : BaseRepository, ICoffeeRepository
         conn.Open();
         
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = $"{_coffeeSql} WHERE c.Id = @id";
+        cmd.CommandText = $"{_coffeeSelect} WHERE c.Id = @id";
         cmd.Parameters.AddWithValue("@id", id);
         
         using var reader = cmd.ExecuteReader();
@@ -58,6 +70,47 @@ public class CoffeeRepository : BaseRepository, ICoffeeRepository
         }
         
         return result;
+    }
+
+    public bool Insert(Coffee coffee)
+    {
+        using var conn = Connection;
+        conn.Open();
+
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = _coffeeInsert;
+        cmd.Parameters.AddWithValue("@title", coffee.Title);
+        cmd.Parameters.AddWithValue("@beanVarietyId", coffee.BeanVarietyId);
+
+        coffee.Id = (int)cmd.ExecuteScalar();
+        return coffee.Id != 0;
+    }
+
+    public bool Update(Coffee coffee)
+    {
+        using var conn = Connection;
+        conn.Open();
+
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = _coffeeUpdate;
+        cmd.Parameters.AddWithValue("@id", coffee.Id);
+        cmd.Parameters.AddWithValue("@title", coffee.Title);
+        cmd.Parameters.AddWithValue("@beanVarietyId", coffee.BeanVarietyId);
+
+        int rowsAffected = cmd.ExecuteNonQuery();
+
+        return rowsAffected > 0;
+    }
+
+    public bool Delete(int id)
+    {
+        using var conn = Connection;
+        conn.Open();
+
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = _coffeeDelete;
+
+        return cmd.ExecuteNonQuery() > 0;
     }
 
     private Coffee CoffeeFromReader(SqlDataReader reader)

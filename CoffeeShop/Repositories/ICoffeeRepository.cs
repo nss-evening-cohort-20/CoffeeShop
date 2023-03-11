@@ -6,5 +6,8 @@ namespace CoffeeShop.Repositories
     {
         List<Coffee> GetAll();
         Coffee? GetById(int id);
+        bool Insert(Coffee coffee);
+        bool Update(Coffee coffee);
+        bool Delete(int id);
     }
 }
