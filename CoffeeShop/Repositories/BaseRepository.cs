@@ -4,7 +4,7 @@ namespace CoffeeShop.Repositories;
 
 public abstract class BaseRepository
 {
-    protected readonly string _connectionString;
+    private readonly string _connectionString;
 
     public BaseRepository(IConfiguration configuration)
     {

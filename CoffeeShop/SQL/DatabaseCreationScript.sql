@@ -23,9 +23,7 @@ CREATE TABLE BeanVariety (
 CREATE TABLE Coffee (
     Id INTEGER NOT NULL PRIMARY KEY IDENTITY,
     Title VARCHAR(50) NOT NULL,
-    BeanVarietyId INTEGER NOT NULL,
-
-    CONSTRAINT [FK_Coffee_BeanVariety] FOREIGN KEY ([BeanVarietyId]) REFERENCES [BeanVariety] ([Id])
+    BeanVarietyId INTEGER
 );
 
 

@@ -29,6 +29,7 @@ public class CoffeeRepository : BaseRepository, ICoffeeRepository
 
     private const string _coffeeDelete = @"DELETE FROM Coffee
                                            WHERE Id = @id";
+
     public CoffeeRepository(IConfiguration configuration) : base(configuration)
     {
     }
@@ -40,10 +41,10 @@ public class CoffeeRepository : BaseRepository, ICoffeeRepository
 
         using var cmd = conn.CreateCommand();
         cmd.CommandText = _coffeeSelect;
-        
+
         using var reader = cmd.ExecuteReader();
         List<Coffee> results = new();
-        
+
         while (reader.Read())
         {
             results.Add(CoffeeFromReader(reader));
